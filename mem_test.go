@@ -52,6 +52,19 @@ func TestMem_Write(t *testing.T) {
 		wantErr bool
 	}{
 		{
+			name: "Empty Mem.data, size = 0",
+			fields: fields{
+				data: nil,
+				size: 0,
+			},
+			args: args{
+				p: []byte("nospace"),
+			},
+			wantS:   "e",
+			wantN:   1,
+			wantErr: false,
+		},
+		{
 			name: "Empty Mem.data, p < size",
 			fields: fields{
 				data: nil,
@@ -172,6 +185,38 @@ func TestMem_Write(t *testing.T) {
 			}
 			if !strings.EqualFold(m.String(), tt.wantS) {
 				t.Errorf("Write() m.String() = '%s', tt.wantS '%s'", m.String(), tt.wantS)
+			}
+		})
+	}
+}
+
+func TestMem_Reset(t *testing.T) {
+	type fields struct {
+		data []byte
+		size int
+	}
+	tests := []struct {
+		name   string
+		fields fields
+	}{
+		{
+			name:   "Write() then Reset()",
+			fields: fields{
+				data: []byte("initial"),
+				size: 10,
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			m := New(tt.fields.size)
+			m.Write(tt.fields.data)
+			if len(m.data) != len(tt.fields.data) {
+				t.Errorf("Write() failed. Wrote = %d, expected %d", len(m.data), len(tt.fields.data))
+			}
+			m.Reset()
+			if len(m.data) != 0 {
+				t.Errorf("Reset() failed. data has %d bytes", len(m.data))
 			}
 		})
 	}

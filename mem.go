@@ -17,6 +17,9 @@ var ErrTooLarge = errors.New("bytes.Buffer: too large")
 //New returns an initialized Mem object that
 // implements the io.Writer interface
 func New(n int) *Mem {
+	if n == 0 {
+		n = 1
+	}
 	// If the make fails, give a known error.
 	defer func() {
 		if recover() != nil {
@@ -30,8 +33,20 @@ func New(n int) *Mem {
 }
 
 //String fulfills fmt.Stringer interface
+// it will return the internal bytes array as a string
 func (m *Mem) String() string {
 	return string(m.data)
+}
+
+//Reset empties the in memory data
+func (m *Mem) Reset() {
+	// If the make fails, give a known error.
+	defer func() {
+		if recover() != nil {
+			panic(ErrTooLarge)
+		}
+	}()
+	m.data = make([]byte, 0, 2*m.size)
 }
 
 // Write appends the contents of p to the buffer, truncating the original
